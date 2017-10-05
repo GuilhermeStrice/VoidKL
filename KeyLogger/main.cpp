@@ -26,8 +26,7 @@
 
 using namespace std;
 
-int send_count; // maybe like 1000000
-
+int send_count;
 
 int main(int argc, char **argv)
 {
@@ -91,7 +90,7 @@ int main(int argc, char **argv)
 
 		//SHORT lastc = 0;
 		while (true) {
-			Sleep(2); // give other programs time to run
+			Sleep(15); // give other programs time to run
 
 			// get the active windowtitle
 			char title[2048];
