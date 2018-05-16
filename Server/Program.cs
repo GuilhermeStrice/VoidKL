@@ -5,6 +5,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
 using System.Net;
 
 namespace Server
@@ -15,25 +16,30 @@ namespace Server
 
         static void HandleClient(TcpClient client)
         {
+            Stopwatch stopwatch = new Stopwatch();
             FileStream file = null;
             NetworkStream stream = client.GetStream();
+            stream.ReadTimeout = 900000;
+            stream.WriteTimeout = 900000;
 
             try
             {
                 byte[] user_buffer = new byte[1024];
                 int user_recv = stream.Read(user_buffer, 0, 1024);
+                
+                string path = Directory.GetCurrentDirectory() + "\\" + Encoding.ASCII.GetString(user_buffer, 0, user_recv - 1) + ".txt";
 
-                string username = Encoding.ASCII.GetString(user_buffer, 0, user_recv - 1) + ".txt";
-
-                file = File.Open(Directory.GetCurrentDirectory() + "\\" + username, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                if (File.Exists(path))
+                    file = File.Open(path, FileMode.Open, FileAccess.ReadWrite);
+                else
+                {
+                    file = File.Create(path);
+                }
 
                 byte[] data = Encoding.ASCII.GetBytes(Environment.NewLine + DateTime.Now.ToString() + Environment.NewLine);
                 file.Write(data, 0, data.Length);
-
-                byte[] start_message = Encoding.ASCII.GetBytes("start");
-                stream.Write(start_message, 0, start_message.Length);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 try
                 {
@@ -46,25 +52,27 @@ namespace Server
                 file = null;
             }
 
+            stopwatch.Start();
             while (!stop)
             {
-                try // idk if this will work but it will do the trick
+                try
                 {
-                    byte[] buffer = new byte[4096];
-                    int recv = stream.Read(buffer, 0, 4096);
-
-                    if (recv > 0)
+                    if (stream.DataAvailable)
                     {
-                        string msg = Encoding.ASCII.GetString(buffer, 0, recv);
+                        stopwatch.Reset();
+                        stopwatch.Start();
+                        byte[] receive = new byte[4096];
+                        int recv = stream.Read(receive, 0, 4096);
 
-                        if (msg == "disconnect")
+                        if (recv > 0)
                         {
-                            break;
+                            string msg = Encoding.ASCII.GetString(receive, 0, recv);
+                            file.Write(receive, 0, recv);
+                            Console.WriteLine(Encoding.ASCII.GetString(receive, 0, recv));
                         }
-
-                        file.Write(buffer, 0, recv);
-                        //Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, recv));
                     }
+                    else if (stopwatch.ElapsedMilliseconds == 900000)
+                        break;
                 }
                 catch
                 {
@@ -76,33 +84,24 @@ namespace Server
             {
                 file.Flush();
                 file.Close();
+                client.Close();
             }
+
+            Console.WriteLine("Client Disconnected");
         }
 
         static void Main(string[] args)
         {
-            TcpListener server = new TcpListener(IPAddress.Any, 39852);
+            TcpListener server = new TcpListener(IPAddress.Any, 21589);
 
             server.Start();
-
-            new Thread(() =>
+            
+            while (!stop)
             {
-                while (!stop)
-                {
-                    TcpClient client = server.AcceptTcpClient();
+                TcpClient client = server.AcceptTcpClient();
 
-                    new Thread(() => HandleClient(client)).Start();
-                }
-            });
-
-            while (true)
-            {
-                string command = Console.ReadLine();
-
-                if (command == "stop")
-                {
-                    stop = true;
-                }
+                new Thread(() => HandleClient(client)).Start();
+                Console.WriteLine("Client Connected");
             }
         }
     }
