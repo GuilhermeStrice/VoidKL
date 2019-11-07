@@ -22,7 +22,7 @@ namespace Server
             stream.ReadTimeout = 900000;
             stream.WriteTimeout = 900000;
 
-            try
+            /*try
             {
                 byte[] user_buffer = new byte[1024];
                 int user_recv = stream.Read(user_buffer, 0, 1024);
@@ -50,7 +50,7 @@ namespace Server
                 catch { }
 
                 file = null;
-            }
+            }*/
 
             stopwatch.Start();
             while (!stop)
@@ -66,8 +66,8 @@ namespace Server
 
                         if (recv > 0)
                         {
-                            string msg = Encoding.ASCII.GetString(receive, 0, recv);
-                            file.Write(receive, 0, recv);
+                            //string msg = Encoding.ASCII.GetString(receive, 0, recv);
+                            //file.Write(receive, 0, recv);
                             Console.WriteLine(Encoding.ASCII.GetString(receive, 0, recv));
                         }
                     }
@@ -80,19 +80,19 @@ namespace Server
                 }
             }
 
-            if (file != null)
+            /*if (file != null)
             {
                 file.Flush();
                 file.Close();
                 client.Close();
-            }
+            }*/
 
             Console.WriteLine("Client Disconnected");
         }
 
         static void Main(string[] args)
         {
-            TcpListener server = new TcpListener(IPAddress.Any, 21589);
+            TcpListener server = new TcpListener(IPAddress.Any, 3000);
 
             server.Start();
             
